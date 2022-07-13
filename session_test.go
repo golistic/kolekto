@@ -3,9 +3,10 @@
 package kolekto
 
 import (
-	"github.com/geertjanvdk/xkit/xt"
-	"kolekto/kolektor"
 	"testing"
+
+	"github.com/geertjanvdk/xkit/xt"
+	"github.com/golistic/kolekto/kolektor"
 )
 
 type Book struct {

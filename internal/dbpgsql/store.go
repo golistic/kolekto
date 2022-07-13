@@ -8,11 +8,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/georgysavva/scany/pgxscan"
+	"github.com/golistic/kolekto/kolektor"
+	"github.com/golistic/kolekto/stores"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"kolekto/internal/stores"
-	"kolekto/kolektor"
 )
 
 // Store defines the PostgreSQL backed data store.

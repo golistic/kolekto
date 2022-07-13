@@ -8,10 +8,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/go-sql-driver/mysql"
-	"kolekto/internal/stores"
-	"kolekto/kolektor"
 	"text/template"
+
+	"github.com/go-sql-driver/mysql"
+	"github.com/golistic/kolekto/kolektor"
+	"github.com/golistic/kolekto/stores"
 )
 
 // Store defines the MySQL backed data store.

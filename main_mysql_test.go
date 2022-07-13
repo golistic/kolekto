@@ -8,8 +8,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
 	"github.com/go-sql-driver/mysql"
-	"kolekto/internal/stores"
+	"github.com/golistic/kolekto/stores"
 )
 
 func init() {

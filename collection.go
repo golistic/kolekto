@@ -5,7 +5,7 @@ package kolekto
 import (
 	"reflect"
 
-	"kolekto/kolektor"
+	"github.com/golistic/kolekto/kolektor"
 )
 
 // Collection manages a JSON collection.

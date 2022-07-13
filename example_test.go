@@ -5,10 +5,11 @@ package kolekto_test
 import (
 	"fmt"
 	"html/template"
-	"kolekto"
-	"kolekto/internal/stores"
-	"kolekto/kolektor"
 	"os"
+
+	"github.com/golistic/kolekto"
+	"github.com/golistic/kolekto/kolektor"
+	"github.com/golistic/kolekto/stores"
 )
 
 type Band struct {

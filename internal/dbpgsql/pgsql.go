@@ -4,7 +4,8 @@ package dbpgsql
 
 import (
 	"fmt"
-	"kolekto/internal/stores"
+
+	"github.com/golistic/kolekto/stores"
 )
 
 const dmlReturningMeta = "id, uid, created, updated"
