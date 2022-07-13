@@ -1,0 +1,19 @@
+services:
+  postgresql:
+    container_name: kolekto-pgsql
+    image: postgres:14.3-alpine
+    environment:
+      - POSTGRES_DB=iam
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5438:5432
+
+  mysql:
+    container_name: kolekto-mysql
+    image: mysql:8.0
+    environment:
+      - MYSQL_DATABASE=kolekto
+      - MYSQL_ROOT_PASSWORD=mysql
+    ports:
+      - 3360:3306
