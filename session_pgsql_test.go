@@ -5,9 +5,10 @@
 package kolekto
 
 import (
-	"kolekto/internal/dbpgsql"
-	"kolekto/internal/stores"
 	"testing"
+
+	"github.com/golistic/kolekto/stores"
+	"github.com/golistic/kolekto/stores/dbpgsql"
 
 	"github.com/geertjanvdk/xkit/xt"
 )

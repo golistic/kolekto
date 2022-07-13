@@ -4,9 +4,10 @@ package kolekto
 
 import (
 	"fmt"
-	"kolekto/internal/stores"
 	"os"
 	"testing"
+
+	"github.com/golistic/kolekto/stores"
 )
 
 // following defaults assume Docker containers are started using the

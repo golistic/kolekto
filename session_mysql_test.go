@@ -3,9 +3,10 @@
 package kolekto
 
 import (
-	"kolekto/internal/dbmysql"
-	"kolekto/internal/stores"
 	"testing"
+
+	"github.com/golistic/kolekto/stores"
+	"github.com/golistic/kolekto/stores/dbmysql"
 
 	"github.com/geertjanvdk/xkit/xt"
 )

@@ -8,11 +8,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/georgysavva/scany/pgxscan"
+	"github.com/golistic/kolekto/kolektor"
+	"github.com/golistic/kolekto/stores"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"kolekto/internal/stores"
-	"kolekto/kolektor"
 )
 
 // Store defines the PostgreSQL backed data store.
@@ -37,11 +38,11 @@ func New(dsn string) (kolektor.Storer, error) {
 	}
 
 	if _, err := s.pool.Acquire(context.Background()); err != nil {
-		return nil, fmt.Errorf("failed checking store connection (%s)", err)
+		return nil, fmt.Errorf("failed checking store connection (%w)", err)
 	}
 
 	if _, err := s.pool.Exec(context.Background(), PostgreSQLFunctions); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed checking store connection (%w)", err)
 	}
 
 	return s, nil
@@ -60,10 +61,13 @@ func (s *Store) GetObject(obj kolektor.Modeler, field string, value any) error {
 
 	conn, err := s.pool.Acquire(context.Background())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed getting object (%w)", err)
 	}
 	if err := pgxscan.Get(context.Background(), conn, &obj, q, value); err != nil {
-		return fmt.Errorf("failed getting object (%s)", err)
+		if err == pgx.ErrNoRows {
+			return stores.ErrNoObject{Name: obj.CollectionName()}
+		}
+		return fmt.Errorf("failed getting object (%w)", err)
 	}
 
 	return err
@@ -73,7 +77,7 @@ func (s *Store) GetObject(obj kolektor.Modeler, field string, value any) error {
 func (s *Store) StoreObject(obj kolektor.Modeler) (*kolektor.Meta, error) {
 	conn, err := s.pool.Acquire(context.Background())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed storing object (%w)", err)
 	}
 
 	objID := obj.GetID()
@@ -82,29 +86,26 @@ func (s *Store) StoreObject(obj kolektor.Modeler) (*kolektor.Meta, error) {
 
 	data, err := json.Marshal(obj)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed storing object (%w)", err)
 	}
 
 	var row pgx.Row
 
-	var action string
 	if objID == 0 {
 		q := fmt.Sprintf("INSERT INTO %s (data, uid) VALUES ($1, NULLIF($2, '')) "+
 			"RETURNING "+dmlReturningMeta,
 			obj.CollectionName())
 		row = conn.QueryRow(context.Background(), q, data, objUID)
-		action = "inserting"
 	} else {
 		q := fmt.Sprintf("UPDATE %s SET data = $1, uid = NULLIF($2, '') "+
 			"WHERE id = $3 RETURNING "+dmlReturningMeta,
 			obj.CollectionName())
 		row = conn.QueryRow(context.Background(), q, data, objUID, objID)
-		action = "updating"
 	}
 
 	meta := &kolektor.Meta{}
 	if err := row.Scan(&meta.ID, &meta.UID, &meta.Created, &meta.Updated); err != nil {
-		return nil, fmt.Errorf("failed %s object (%s)", action, err)
+		return nil, fmt.Errorf("failed storing object (%w)", err)
 	}
 
 	return meta, err
@@ -118,12 +119,12 @@ func (s *Store) InitCollection(model kolektor.Modeler) error {
 
 	conn, err := s.pool.Acquire(context.Background())
 	if err != nil {
-		return fmt.Errorf("failed acquiring data store connection (%s)", err)
+		return fmt.Errorf("failed initializing collection (%w)", err)
 	}
 
 	// CREATE TABLE
 	if _, err := conn.Exec(context.Background(), ddl); err != nil {
-		return err
+		return fmt.Errorf("failed initializing collection (%w)", err)
 	}
 
 	// CREATE TRIGGERs
@@ -131,14 +132,14 @@ func (s *Store) InitCollection(model kolektor.Modeler) error {
 BEFORE UPDATE ON %s FOR EACH ROW EXECUTE PROCEDURE updated_now()`,
 		tableName, tableName)
 	if _, err := conn.Exec(context.Background(), tr); err != nil {
-		return err
+		return fmt.Errorf("failed initializing collection (%w)", err)
 	}
 
 	tr = fmt.Sprintf(`CREATE OR REPLACE TRIGGER tr_%s_uid
 BEFORE INSERT OR UPDATE ON %s FOR EACH ROW EXECUTE PROCEDURE default_uid()`,
 		tableName, tableName)
 	if _, err := conn.Exec(context.Background(), tr); err != nil {
-		return err
+		return fmt.Errorf("failed initializing collection (%w)", err)
 	}
 
 	return nil
@@ -150,11 +151,11 @@ func (s *Store) RemoveCollection(model kolektor.Modeler) error {
 
 	conn, err := s.pool.Acquire(context.Background())
 	if err != nil {
-		return fmt.Errorf("failed acquiring data store connection (%s)", err)
+		return fmt.Errorf("failed removing collection (%w)", err)
 	}
 
 	if _, err := conn.Exec(context.Background(), ddl); err != nil {
-		return err
+		return fmt.Errorf("failed removing collection (%w)", err)
 	}
 
 	return nil

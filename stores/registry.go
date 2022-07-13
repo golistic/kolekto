@@ -3,7 +3,7 @@
 package stores
 
 import (
-	"kolekto/kolektor"
+	"github.com/golistic/kolekto/kolektor"
 )
 
 var registry = map[StoreKind]func(dsn string) (kolektor.Storer, error){}

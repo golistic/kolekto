@@ -3,8 +3,8 @@
 package kolekto
 
 import (
-	"kolekto/internal/stores"
-	"kolekto/kolektor"
+	"github.com/golistic/kolekto/kolektor"
+	"github.com/golistic/kolekto/stores"
 )
 
 // Session wraps around a store object to manage JSON collections.

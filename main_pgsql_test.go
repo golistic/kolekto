@@ -7,10 +7,11 @@ package kolekto
 import (
 	"context"
 	"fmt"
+	"strings"
+
+	"github.com/golistic/kolekto/stores"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
-	"kolekto/internal/stores"
-	"strings"
 )
 
 func init() {

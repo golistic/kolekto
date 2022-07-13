@@ -1,4 +1,4 @@
-module kolekto
+module github.com/golistic/kolekto
 
 go 1.18
 
