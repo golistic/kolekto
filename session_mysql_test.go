@@ -5,8 +5,8 @@ package kolekto
 import (
 	"testing"
 
-	"github.com/golistic/kolekto/internal/dbmysql"
 	"github.com/golistic/kolekto/stores"
+	"github.com/golistic/kolekto/stores/dbmysql"
 
 	"github.com/geertjanvdk/xkit/xt"
 )

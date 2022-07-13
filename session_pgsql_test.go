@@ -7,8 +7,8 @@ package kolekto
 import (
 	"testing"
 
-	"github.com/golistic/kolekto/internal/dbpgsql"
 	"github.com/golistic/kolekto/stores"
+	"github.com/golistic/kolekto/stores/dbpgsql"
 
 	"github.com/geertjanvdk/xkit/xt"
 )
