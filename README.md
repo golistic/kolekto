@@ -92,8 +92,12 @@ Currently, Kolekto supports the following data stores:
 
 Note: the version denotes what we use for testing. Previous versions might not work.
 
-All the above data stores are available when compiling Kolekto. However,
-if you need only MySQL or only PostgreSQL you can use build tags:
+To be able to use a store, you will need first to import it, so it gets registered.
+(This is similar as the `sql` drivers.)  
+For example, to use the MySQL store, somewhere in your code:
+
+    _ "github.com/golistic/kolekto/stores/dbmysql"
+
 
 | Build Tag   | Effect                     |
 |-------------|----------------------------|

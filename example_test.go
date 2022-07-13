@@ -10,6 +10,8 @@ import (
 	"github.com/golistic/kolekto"
 	"github.com/golistic/kolekto/kolektor"
 	"github.com/golistic/kolekto/stores"
+
+	_ "github.com/golistic/kolekto/stores/dbpgsql" // register store
 )
 
 type Band struct {
