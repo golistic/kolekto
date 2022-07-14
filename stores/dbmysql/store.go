@@ -23,7 +23,7 @@ type Store struct {
 var _ kolektor.Storer = &Store{}
 
 func init() {
-	stores.Register(stores.MySQL, New)
+	stores.Register(kolektor.MySQL, New)
 }
 
 // New instantiates a PostgreSQL backed data store.
@@ -54,6 +54,16 @@ func New(dsn string) (kolektor.Storer, error) {
 	}
 
 	return s, nil
+}
+
+// mustSQLConn is mainly for testing.
+// Panics on errors.
+func (s *Store) mustSQLConn() *sql.Conn {
+	conn, err := s.pool.Conn(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	return conn
 }
 
 // Name returns the name of the data store.
@@ -197,6 +207,13 @@ BEFORE UPDATE ON %s FOR EACH ROW SET new.uid = IF(new.uid='', default_uid(), new
 		tableName, tableName)
 	if _, err := conn.ExecContext(context.Background(), tr); err != nil {
 		return fmt.Errorf("failed initializing collection (%w)", err)
+	}
+
+	// INDEXING
+	if idxer, ok := model.(kolektor.Indexer); ok {
+		if err := addIndexes(conn, idxer, tableName); err != nil {
+			return err
+		}
 	}
 
 	return nil

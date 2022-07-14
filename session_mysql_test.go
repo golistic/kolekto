@@ -5,7 +5,7 @@ package kolekto
 import (
 	"testing"
 
-	"github.com/golistic/kolekto/stores"
+	"github.com/golistic/kolekto/kolektor"
 	"github.com/golistic/kolekto/stores/dbmysql"
 
 	"github.com/geertjanvdk/xkit/xt"
@@ -13,7 +13,7 @@ import (
 
 func TestNew(t *testing.T) {
 	t.Run("test MySQL", func(t *testing.T) {
-		session, err := NewSession(stores.MySQL, testAllDSN[stores.MySQL])
+		session, err := NewSession(kolektor.MySQL, testAllDSN[kolektor.MySQL])
 		xt.OK(t, err)
 		_, ok := session.store.(*dbmysql.Store)
 		xt.Assert(t, ok, "expected *dbmysql.Store")
@@ -21,7 +21,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestCollection_Store_mysql(t *testing.T) {
-	session, err := NewSession(stores.MySQL, testAllDSN[stores.MySQL])
+	session, err := NewSession(kolektor.MySQL, testAllDSN[kolektor.MySQL])
 	xt.OK(t, err)
 
 	testCollection_Store(t, session)

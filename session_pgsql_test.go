@@ -7,7 +7,7 @@ package kolekto
 import (
 	"testing"
 
-	"github.com/golistic/kolekto/stores"
+	"github.com/golistic/kolekto/kolektor"
 	"github.com/golistic/kolekto/stores/dbpgsql"
 
 	"github.com/geertjanvdk/xkit/xt"
@@ -15,7 +15,7 @@ import (
 
 func TestNew_pgsql(t *testing.T) {
 	t.Run("test PostgreSQL using pgxpool", func(t *testing.T) {
-		session, err := NewSession(stores.PgSQL, testAllDSN[stores.PgSQL])
+		session, err := NewSession(kolektor.PgSQL, testAllDSN[kolektor.PgSQL])
 		xt.OK(t, err)
 		_, ok := session.store.(*dbpgsql.Store)
 		xt.Assert(t, ok, "expected *dbpgsql.Store")
@@ -23,7 +23,7 @@ func TestNew_pgsql(t *testing.T) {
 }
 
 func TestCollection_Store_pgsql(t *testing.T) {
-	session, err := NewSession(stores.PgSQL, testAllDSN[stores.PgSQL])
+	session, err := NewSession(kolektor.PgSQL, testAllDSN[kolektor.PgSQL])
 	xt.OK(t, err)
 
 	testCollection_Store(t, session)

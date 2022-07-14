@@ -15,7 +15,7 @@ type Session struct {
 // NewSession instantiates a new Session using a certain kind of
 // data store. The dsn or data source name (DSN) is used to connect.
 // The format of the DSN depends on the kind of store used.
-func NewSession(kind stores.StoreKind, dsn string) (*Session, error) {
+func NewSession(kind kolektor.StoreKind, dsn string) (*Session, error) {
 	ses := &Session{}
 	var err error
 

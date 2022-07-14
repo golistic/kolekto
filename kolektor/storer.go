@@ -11,3 +11,13 @@ type Storer interface {
 	RemoveCollection(model Modeler) error
 	InitCollection(model Modeler) error
 }
+
+type Indexer interface {
+	Indexes(kind StoreKind) []Index
+}
+
+type Index struct {
+	Name       string
+	Unique     bool
+	Expression string
+}

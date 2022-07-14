@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/golistic/kolekto/stores"
+	"github.com/golistic/kolekto/kolektor"
 )
 
 // following defaults assume Docker containers are started using the
@@ -18,8 +18,8 @@ const defaultMySQLDSN = "root:mysql@tcp(localhost:3360)/kolekto_test"
 var (
 	testExitCode int
 	testErr      error
-	testAllDSN   = map[stores.StoreKind]string{}
-	prepareStore = map[stores.StoreKind]func(dsn string) error{}
+	testAllDSN   = map[kolektor.StoreKind]string{}
+	prepareStore = map[kolektor.StoreKind]func(dsn string) (string, error){}
 )
 
 func testTearDown() {
@@ -34,19 +34,20 @@ func TestMain(m *testing.M) {
 	defer testTearDown()
 
 	if v, have := os.LookupEnv("TEST_PGSQL_DSN"); have {
-		testAllDSN[stores.PgSQL] = v
+		testAllDSN[kolektor.PgSQL] = v
 	} else {
-		testAllDSN[stores.PgSQL] = defaultPgSQLDSN
+		testAllDSN[kolektor.PgSQL] = defaultPgSQLDSN
 	}
 
 	if v, have := os.LookupEnv("TEST_MYSQL_DSN"); have {
-		testAllDSN[stores.MySQL] = v
+		testAllDSN[kolektor.MySQL] = v
 	} else {
-		testAllDSN[stores.MySQL] = defaultMySQLDSN
+		testAllDSN[kolektor.MySQL] = defaultMySQLDSN
 	}
 
 	for kind, prep := range prepareStore {
-		if testErr = prep(testAllDSN[kind]); testErr != nil {
+		testAllDSN[kind], testErr = prep(testAllDSN[kind])
+		if testErr != nil {
 			return
 		}
 	}
