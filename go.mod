@@ -11,6 +11,7 @@ require (
 )
 
 require (
+	github.com/golistic/xstrings v0.0.0-20220526163930-92a29fd1bf54 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

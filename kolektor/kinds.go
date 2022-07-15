@@ -1,6 +1,6 @@
 // Copyright (c) 2022, Geert JM Vanderkelen
 
-package stores
+package kolektor
 
 type StoreKind int
 

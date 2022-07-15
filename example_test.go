@@ -9,8 +9,6 @@ import (
 
 	"github.com/golistic/kolekto"
 	"github.com/golistic/kolekto/kolektor"
-	"github.com/golistic/kolekto/stores"
-
 	_ "github.com/golistic/kolekto/stores/dbpgsql" // register store
 )
 
@@ -32,7 +30,7 @@ func Example() {
 	// We assume the 'music' database exists.
 	dsn := "user=postgres password=postgres host=localhost dbname=music port=5438"
 
-	session, err := kolekto.NewSession(stores.PgSQL, dsn)
+	session, err := kolekto.NewSession(kolektor.PgSQL, dsn)
 	if err != nil {
 		fmt.Printf("Error: %s", err)
 		return

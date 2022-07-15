@@ -22,6 +22,39 @@ func (b Book) CollectionName() string {
 	return "books"
 }
 
+func (b Book) Indexes(kind kolektor.StoreKind) []kolektor.Index {
+	m := map[kolektor.StoreKind][]kolektor.Index{
+		kolektor.MySQL: {
+			{
+				Name:       "uq_books_isbn13",
+				Unique:     true,
+				Expression: "((CAST(data->>'$.isbn13' AS CHAR(20))))",
+			},
+			{
+				Name:       "ix_books_title",
+				Expression: "((CAST(data->>'$.title' AS CHAR(200))))",
+			},
+		},
+		kolektor.PgSQL: {
+			{
+				Name:       "uq_books_isbn13",
+				Unique:     true,
+				Expression: "((data->>'isbn13'))",
+			},
+			{
+				Name:       "ix_books_title",
+				Expression: "((data->>'title'))",
+			},
+		},
+	}
+
+	if res, have := m[kind]; have {
+		return res
+	}
+
+	return nil
+}
+
 func testCollection_Store(t *testing.T, session *Session) {
 	t.Run("store object and retrieve it", func(t *testing.T) {
 		book := &Book{
