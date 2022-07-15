@@ -2,6 +2,8 @@
 
 package kolektor
 
+import "context"
+
 // Storer defines methods which must be implemented by data
 // stores types.
 type Storer interface {
@@ -10,6 +12,7 @@ type Storer interface {
 	StoreObject(obj Modeler) (*Meta, error)
 	RemoveCollection(model Modeler) error
 	InitCollection(model Modeler) error
+	Connection(ctx context.Context) (any, error)
 }
 
 type Indexer interface {

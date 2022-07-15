@@ -3,6 +3,8 @@
 package kolekto
 
 import (
+	"context"
+
 	"github.com/golistic/kolekto/kolektor"
 	"github.com/golistic/kolekto/stores"
 )
@@ -43,4 +45,11 @@ func (ses *Session) Collection(model kolektor.Modeler) (*Collection, error) {
 // by mistake, you can consider yourself screwed.
 func (ses *Session) RemoveCollection(model kolektor.Modeler) error {
 	return ses.store.RemoveCollection(model)
+}
+
+// Connection returns a connection to the store in use by this session.
+// The caller is responsible for type asserting the result to the appropriated
+// type for this store.
+func (ses *Session) Connection(ctx context.Context) (any, error) {
+	return ses.store.Connection(ctx)
 }

@@ -48,10 +48,25 @@ func New(dsn string) (kolektor.Storer, error) {
 	return s, nil
 }
 
+// Connection returns a connection to the store. The caller is responsible
+// for type asserting the result to the appropriated type for this store,
+// namely *pgxpool.Conn.
+func (s *Store) Connection(ctx context.Context) (any, error) {
+	return s.connection(ctx)
+}
+
+func (s *Store) connection(ctx context.Context) (*pgxpool.Conn, error) {
+	conn, err := s.pool.Acquire(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed getting store collection (%w)", err)
+	}
+	return conn, nil
+}
+
 // mustSQLConn is mainly for testing.
 // Panics on errors.
 func (s *Store) mustConn() *pgxpool.Conn {
-	conn, err := s.pool.Acquire(context.Background())
+	conn, err := s.connection(context.Background())
 	if err != nil {
 		panic(err)
 	}

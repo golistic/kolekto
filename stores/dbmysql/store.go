@@ -56,10 +56,25 @@ func New(dsn string) (kolektor.Storer, error) {
 	return s, nil
 }
 
+// Connection returns a connection to the store. The caller is responsible
+// for type asserting the result to the appropriated type for this store,
+// namely *sql.Conn.
+func (s *Store) Connection(ctx context.Context) (any, error) {
+	return s.connection(ctx)
+}
+
+func (s *Store) connection(ctx context.Context) (*sql.Conn, error) {
+	conn, err := s.pool.Conn(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed getting store collection (%w)", err)
+	}
+	return conn, nil
+}
+
 // mustSQLConn is mainly for testing.
 // Panics on errors.
 func (s *Store) mustSQLConn() *sql.Conn {
-	conn, err := s.pool.Conn(context.Background())
+	conn, err := s.connection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -178,9 +193,9 @@ func (s *Store) init() error {
 
 // InitCollection initializes the model's collection.
 func (s *Store) InitCollection(model kolektor.Modeler) error {
-	conn, err := s.pool.Conn(context.Background())
+	conn, err := s.connection(context.Background())
 	if err != nil {
-		return fmt.Errorf("failed initializing collection (%w)", err)
+		return err
 	}
 	defer func() { _ = conn.Close() }()
 
