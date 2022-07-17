@@ -8,11 +8,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/golistic/kolekto/kolektor"
 	"github.com/golistic/kolekto/stores"
+	"github.com/golistic/xstrings"
 )
 
 // Store defines the MySQL backed data store.
@@ -87,11 +89,26 @@ func (s *Store) Name() string {
 }
 
 // GetObject retrieves a stored object and stores it in obj.
-func (s *Store) GetObject(obj kolektor.Modeler, field string, value any) error {
-	q := fmt.Sprintf("SELECT %s FROM %s WHERE %s = ?", mysqlMergeDataMeta, obj.CollectionName(), field)
+func (s *Store) GetObject(obj kolektor.Modeler, fieldMap kolektor.FieldMap) error {
+	if len(fieldMap) == 0 {
+		return fmt.Errorf("need at least one field to filter on")
+	}
+
+	var ands []string
+	var values []any
+	for name, value := range fieldMap {
+		if !(strings.HasPrefix(name, "(") || xstrings.Search(stores.ReservedFields, name) != -1) {
+			name = fmt.Sprintf("data->>'$.%s'", name)
+		}
+		ands = append(ands, name+" = ?")
+		values = append(values, value)
+	}
+
+	q := fmt.Sprintf("SELECT %s FROM %s WHERE %s",
+		mysqlMergeDataMeta, obj.CollectionName(), strings.Join(ands, " AND "))
 
 	var data []byte
-	if err := s.pool.QueryRowContext(context.Background(), q, value).Scan(&data); err != nil {
+	if err := s.pool.QueryRowContext(context.Background(), q, values...).Scan(&data); err != nil {
 		if err == sql.ErrNoRows {
 			return stores.ErrNoObject{Name: obj.CollectionName()}
 		}

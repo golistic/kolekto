@@ -8,10 +8,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/golistic/kolekto/kolektor"
 	"github.com/golistic/kolekto/stores"
+	"github.com/golistic/xstrings"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -79,16 +81,30 @@ func (s *Store) Name() string {
 }
 
 // GetObject retrieves a stored object and stores it in obj.
-func (s *Store) GetObject(obj kolektor.Modeler, field string, value any) error {
-	collName := obj.CollectionName()
+func (s *Store) GetObject(obj kolektor.Modeler, fieldMap kolektor.FieldMap) error {
+	if len(fieldMap) == 0 {
+		return fmt.Errorf("need at least one field to filter on")
+	}
+	var ands []string
+	var values []any
+	var c = 1
+	for name, value := range fieldMap {
+		if !(strings.HasPrefix(name, "(") || xstrings.Search(stores.ReservedFields, name) != -1) {
+			name = fmt.Sprintf("data->>'%s'", name)
+		}
+		ands = append(ands, fmt.Sprintf("%s = $%d", name, c))
+		values = append(values, value)
+		c += 1
+	}
 
-	q := fmt.Sprintf("SELECT %s FROM %s WHERE %s = $1", pgsqlMergeDataMeta, collName, field)
+	q := fmt.Sprintf("SELECT %s FROM %s WHERE %s",
+		pgsqlMergeDataMeta, obj.CollectionName(), strings.Join(ands, " AND "))
 
 	conn, err := s.pool.Acquire(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed getting object (%w)", err)
 	}
-	if err := pgxscan.Get(context.Background(), conn, &obj, q, value); err != nil {
+	if err := pgxscan.Get(context.Background(), conn, &obj, q, values...); err != nil {
 		if err == pgx.ErrNoRows {
 			return stores.ErrNoObject{Name: obj.CollectionName()}
 		}

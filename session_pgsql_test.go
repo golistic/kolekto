@@ -29,7 +29,7 @@ func TestCollection_Store_pgsql(t *testing.T) {
 	session, err := NewSession(kolektor.PgSQL, testAllDSN[kolektor.PgSQL])
 	xt.OK(t, err)
 
-	testCollection_Store(t, session)
+	testCollectionStore(t, session)
 }
 
 func TestSession_Connection_pgsql(t *testing.T) {

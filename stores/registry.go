@@ -22,3 +22,9 @@ func New(kind kolektor.StoreKind, dsn string) (kolektor.Storer, error) {
 func Register(kind kolektor.StoreKind, fn func(dsn string) (kolektor.Storer, error)) {
 	registry[kind] = fn
 }
+
+// Registered returns map of all registered stores. The key is the kind
+// and the function with which a Store instance is created.
+func Registered() map[kolektor.StoreKind]func(dsn string) (kolektor.Storer, error) {
+	return registry
+}

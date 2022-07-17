@@ -26,7 +26,7 @@ func TestCollection_Store_mysql(t *testing.T) {
 	session, err := NewSession(kolektor.MySQL, testAllDSN[kolektor.MySQL])
 	xt.OK(t, err)
 
-	testCollection_Store(t, session)
+	testCollectionStore(t, session)
 }
 
 func TestSession_Connection_mysql(t *testing.T) {

@@ -29,6 +29,20 @@ func NewSession(kind kolektor.StoreKind, dsn string) (*Session, error) {
 	return ses, nil
 }
 
+// newSession takes data source name as dsn, and the function used to
+// instantiate the store.
+// This is mostly used for testing for looping of all registered stores.
+func newSession(dsn string, fn func(dsn string) (kolektor.Storer, error)) (*Session, error) {
+	ses := &Session{}
+	var err error
+
+	ses.store, err = fn(dsn)
+	if err != nil {
+		return nil, err
+	}
+	return ses, nil
+}
+
 // Collection returns an instance that can be used to store and retrieve
 // objects which are based on the provided model.
 // If the collection is not yet available in the data store, it is created.

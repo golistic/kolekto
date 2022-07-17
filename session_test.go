@@ -11,9 +11,10 @@ import (
 
 type Book struct {
 	kolektor.Model
-	ISBN13  string   `json:"isbn13"`
-	Title   string   `json:"title"`
-	Authors []string `json:"authors,omitempty"`
+	ISBN13    string   `json:"isbn13"`
+	Title     string   `json:"title"`
+	Authors   []string `json:"authors,omitempty"`
+	Publisher string   `json:"publisher"`
 }
 
 var _ kolektor.Modeler = &Book{}
@@ -34,6 +35,10 @@ func (b Book) Indexes(kind kolektor.StoreKind) []kolektor.Index {
 				Name:       "ix_books_title",
 				Expression: "((CAST(data->>'$.title' AS CHAR(200))))",
 			},
+			{
+				Name:       "ix_books_publisher",
+				Expression: "((CAST(data->>'$.title' AS CHAR(200))))",
+			},
 		},
 		kolektor.PgSQL: {
 			{
@@ -45,6 +50,10 @@ func (b Book) Indexes(kind kolektor.StoreKind) []kolektor.Index {
 				Name:       "ix_books_title",
 				Expression: "((data->>'title'))",
 			},
+			{
+				Name:       "ix_books_publisher",
+				Expression: "((data->>'publisher'))",
+			},
 		},
 	}
 
@@ -55,7 +64,7 @@ func (b Book) Indexes(kind kolektor.StoreKind) []kolektor.Index {
 	return nil
 }
 
-func testCollection_Store(t *testing.T, session *Session) {
+func testCollectionStore(t *testing.T, session *Session) {
 	t.Run("store object and retrieve it", func(t *testing.T) {
 		book := &Book{
 			ISBN13: "978-0135800911",
