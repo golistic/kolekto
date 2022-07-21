@@ -42,7 +42,11 @@ func (coll *Collection) Get(obj kolektor.Modeler, uid any) error {
 		field = "uid"
 	}
 
-	return coll.ses.store.GetObject(obj, field, uid)
+	return coll.GetByFields(obj, map[string]any{field: uid})
+}
+
+func (coll *Collection) GetByFields(obj kolektor.Modeler, fields map[string]any) error {
+	return coll.ses.store.GetObject(obj, fields)
 }
 
 // Store stores an object into the collection.

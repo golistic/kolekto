@@ -3,6 +3,8 @@
 package kolekto
 
 import (
+	"context"
+
 	"github.com/golistic/kolekto/kolektor"
 	"github.com/golistic/kolekto/stores"
 )
@@ -27,6 +29,20 @@ func NewSession(kind kolektor.StoreKind, dsn string) (*Session, error) {
 	return ses, nil
 }
 
+// newSession takes data source name as dsn, and the function used to
+// instantiate the store.
+// This is mostly used for testing for looping of all registered stores.
+func newSession(dsn string, fn func(dsn string) (kolektor.Storer, error)) (*Session, error) {
+	ses := &Session{}
+	var err error
+
+	ses.store, err = fn(dsn)
+	if err != nil {
+		return nil, err
+	}
+	return ses, nil
+}
+
 // Collection returns an instance that can be used to store and retrieve
 // objects which are based on the provided model.
 // If the collection is not yet available in the data store, it is created.
@@ -43,4 +59,11 @@ func (ses *Session) Collection(model kolektor.Modeler) (*Collection, error) {
 // by mistake, you can consider yourself screwed.
 func (ses *Session) RemoveCollection(model kolektor.Modeler) error {
 	return ses.store.RemoveCollection(model)
+}
+
+// Connection returns a connection to the store in use by this session.
+// The caller is responsible for type asserting the result to the appropriated
+// type for this store.
+func (ses *Session) Connection(ctx context.Context) (any, error) {
+	return ses.store.Connection(ctx)
 }

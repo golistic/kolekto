@@ -8,10 +8,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/golistic/kolekto/kolektor"
 	"github.com/golistic/kolekto/stores"
+	"github.com/golistic/xstrings"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -48,10 +50,25 @@ func New(dsn string) (kolektor.Storer, error) {
 	return s, nil
 }
 
+// Connection returns a connection to the store. The caller is responsible
+// for type asserting the result to the appropriated type for this store,
+// namely *pgxpool.Conn.
+func (s *Store) Connection(ctx context.Context) (any, error) {
+	return s.connection(ctx)
+}
+
+func (s *Store) connection(ctx context.Context) (*pgxpool.Conn, error) {
+	conn, err := s.pool.Acquire(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed getting store collection (%w)", err)
+	}
+	return conn, nil
+}
+
 // mustSQLConn is mainly for testing.
 // Panics on errors.
 func (s *Store) mustConn() *pgxpool.Conn {
-	conn, err := s.pool.Acquire(context.Background())
+	conn, err := s.connection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -64,16 +81,30 @@ func (s *Store) Name() string {
 }
 
 // GetObject retrieves a stored object and stores it in obj.
-func (s *Store) GetObject(obj kolektor.Modeler, field string, value any) error {
-	collName := obj.CollectionName()
+func (s *Store) GetObject(obj kolektor.Modeler, fieldMap kolektor.FieldMap) error {
+	if len(fieldMap) == 0 {
+		return fmt.Errorf("need at least one field to filter on")
+	}
+	var ands []string
+	var values []any
+	var c = 1
+	for name, value := range fieldMap {
+		if !(strings.HasPrefix(name, "(") || xstrings.Search(stores.ReservedFields, name) != -1) {
+			name = fmt.Sprintf("data->>'%s'", name)
+		}
+		ands = append(ands, fmt.Sprintf("%s = $%d", name, c))
+		values = append(values, value)
+		c += 1
+	}
 
-	q := fmt.Sprintf("SELECT %s FROM %s WHERE %s = $1", pgsqlMergeDataMeta, collName, field)
+	q := fmt.Sprintf("SELECT %s FROM %s WHERE %s",
+		pgsqlMergeDataMeta, obj.CollectionName(), strings.Join(ands, " AND "))
 
 	conn, err := s.pool.Acquire(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed getting object (%w)", err)
 	}
-	if err := pgxscan.Get(context.Background(), conn, &obj, q, value); err != nil {
+	if err := pgxscan.Get(context.Background(), conn, &obj, q, values...); err != nil {
 		if err == pgx.ErrNoRows {
 			return stores.ErrNoObject{Name: obj.CollectionName()}
 		}
