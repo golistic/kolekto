@@ -4,12 +4,11 @@ package kolekto_test
 
 import (
 	"fmt"
-	"html/template"
 	"os"
+	"text/template"
 
 	"github.com/golistic/kolekto"
 	"github.com/golistic/kolekto/kolektor"
-	_ "github.com/golistic/kolekto/stores/dbpgsql" // register store
 )
 
 type Band struct {
@@ -23,14 +22,8 @@ func (b Band) CollectionName() string {
 	return "bands"
 }
 
-func Example() {
-	// note: the connection string reflect the PostgreSQL instance running for
-	// testing the Kolekto package. To start: change into _support/docker-compose and
-	// do `docker compose up -d`.
-	// We assume the 'music' database exists.
-	dsn := "user=postgres password=postgres host=localhost dbname=music port=5438"
-
-	session, err := kolekto.NewSession(kolektor.PgSQL, dsn)
+func exampleStoreRetrieveBand(kind kolektor.StoreKind, dsn string) {
+	session, err := kolekto.NewSession(kind, dsn)
 	if err != nil {
 		fmt.Printf("Error: %s", err)
 		return
@@ -89,13 +82,4 @@ Members:
 		fmt.Printf("Error: %s", err)
 		return
 	}
-
-	// Output:
-	// UID    : f5dea144-caac-4735-a521-34a82b12f20b
-	// Band   : A Tribe Called Quest
-	// Members:
-	//  - Q-Tip
-	//  - Phife Dwag
-	//  - Ali Shaheed Muhammad
-	//  - Jarobi White
 }

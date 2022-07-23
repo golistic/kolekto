@@ -50,12 +50,18 @@ Can be made compatible for Kolekto as:
         return "bands"
     }
 
-The above is part of the `example_test.go` file which shows a full example
-on how to use Kolekto.
+The above is part of the testable example files which shows a full example
+on how to use Kolekto (see [next topic](#example)).
 
 ### Example
 
-Please see the `example_test.go` for a full example.
+The testable example files are provided per store kind. They share however
+the common code, since it should be transparent which database system you
+are using.
+
+* `example_common_test.go` contains the actual examples
+* `example_mysql_test.go` launches the examples using MySQL
+* `example_pgsql_test.go` launhces the example using PostgreSQL
 
 
 Models, Collections, and Sessions

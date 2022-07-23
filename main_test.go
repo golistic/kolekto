@@ -46,8 +46,6 @@ func TestMain(m *testing.M) {
 		testAllDSN[kolektor.MySQL] = defaultMySQLDSN
 	}
 
-	fmt.Println("###", stores.Registered())
-
 	for storeKind := range stores.Registered() {
 		if _, testErr = prepareStore[storeKind](testAllDSN[storeKind]); testErr != nil {
 			return
