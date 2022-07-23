@@ -37,5 +37,8 @@ func PreparePostgreSQL(dsn string) (string, error) {
 		return "", err
 	}
 
+	if err := conn.Close(context.Background()); err != nil {
+		return "", err
+	}
 	return dsn, nil
 }

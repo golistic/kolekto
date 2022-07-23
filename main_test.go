@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/golistic/kolekto/kolektor"
+	"github.com/golistic/kolekto/stores"
 )
 
 // following defaults assume Docker containers are started using the
@@ -45,9 +46,10 @@ func TestMain(m *testing.M) {
 		testAllDSN[kolektor.MySQL] = defaultMySQLDSN
 	}
 
-	for kind, prep := range prepareStore {
-		testAllDSN[kind], testErr = prep(testAllDSN[kind])
-		if testErr != nil {
+	fmt.Println("###", stores.Registered())
+
+	for storeKind := range stores.Registered() {
+		if _, testErr = prepareStore[storeKind](testAllDSN[storeKind]); testErr != nil {
 			return
 		}
 	}

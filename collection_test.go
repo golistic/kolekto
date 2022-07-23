@@ -45,9 +45,9 @@ func TestCollection_ByFields(t *testing.T) {
 
 			t.Run("get object using one field", func(t *testing.T) {
 				book := &Book{}
-				expISNB13 := "978-3-1194-1744-0"
-				xt.OK(t, books.GetByFields(book, kolektor.FieldMap{"isbn13": expISNB13}))
-				xt.Eq(t, expISNB13, book.ISBN13)
+				expISBN13 := "978-3-1194-1744-0"
+				xt.OK(t, books.GetByFields(book, kolektor.FieldMap{"isbn13": expISBN13}))
+				xt.Eq(t, expISBN13, book.ISBN13)
 			})
 
 			t.Run("get object using reserved field", func(t *testing.T) {

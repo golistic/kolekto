@@ -47,11 +47,17 @@ func addIndexes(conn *pgxpool.Conn, idxer kolektor.Indexer, tableName string) er
 			}
 		}
 
-		dml := fmt.Sprintf("CREATE %s INDEX %s ON %s %s; COMMENT ON INDEX %s IS 'kolekto#%s'",
-			unique, idx.Name, tableName, idx.Expression, idx.Name, exprSum)
+		dml := fmt.Sprintf("CREATE %s INDEX CONCURRENTLY %s ON %s %s",
+			unique, idx.Name, tableName, idx.Expression)
 
 		if _, err := conn.Exec(context.Background(), dml); err != nil {
 			return fmt.Errorf("failed creating index %s (%w)", idx.Name, err)
+		}
+
+		comment := fmt.Sprintf("COMMENT ON INDEX %s IS 'kolekto#%s'", idx.Name, exprSum)
+
+		if _, err := conn.Exec(context.Background(), comment); err != nil {
+			return fmt.Errorf("failed adding comment to index %s (%w)", idx.Name, err)
 		}
 	}
 

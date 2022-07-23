@@ -1,5 +1,7 @@
 // Copyright (c) 2022, Geert JM Vanderkelen
 
+//go:build !nopgsql
+
 package dbpgsql
 
 import (

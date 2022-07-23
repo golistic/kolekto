@@ -39,12 +39,13 @@ func New(dsn string) (kolektor.Storer, error) {
 		return nil, err
 	}
 
-	if _, err := s.pool.Acquire(context.Background()); err != nil {
+	if conn, err := s.pool.Acquire(context.Background()); err != nil {
 		return nil, fmt.Errorf("failed checking store connection (%w)", err)
-	}
-
-	if _, err := s.pool.Exec(context.Background(), PostgreSQLFunctions); err != nil {
-		return nil, fmt.Errorf("failed checking store connection (%w)", err)
+	} else {
+		defer func() { conn.Release() }()
+		if _, err := s.pool.Exec(context.Background(), PostgreSQLFunctions); err != nil {
+			return nil, fmt.Errorf("failed checking store connection (%w)", err)
+		}
 	}
 
 	return s, nil
@@ -149,6 +150,8 @@ func (s *Store) StoreObject(obj kolektor.Modeler) (*kolektor.Meta, error) {
 		return nil, fmt.Errorf("failed storing object (%w)", err)
 	}
 
+	conn.Release()
+
 	return meta, err
 }
 
@@ -190,6 +193,8 @@ BEFORE INSERT OR UPDATE ON %s FOR EACH ROW EXECUTE PROCEDURE default_uid()`,
 		}
 	}
 
+	conn.Release()
+
 	return nil
 }
 
@@ -205,6 +210,8 @@ func (s *Store) RemoveCollection(model kolektor.Modeler) error {
 	if _, err := conn.Exec(context.Background(), ddl); err != nil {
 		return fmt.Errorf("failed removing collection (%w)", err)
 	}
+
+	conn.Release()
 
 	return nil
 }
